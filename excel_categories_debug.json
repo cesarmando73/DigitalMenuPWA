@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Copas",
+    "id": "1dc638b8-76a2-4768-beac-bb066e6bcd68",
+    "order": 53
+  },
+  {
+    "name": "Ron",
+    "id": "47ca80bb-504c-431e-ae5e-cc68a372fef2",
+    "order": 58
+  },
+  {
+    "name": "Refrescos",
+    "id": "69f745c2-ab84-4c10-8087-65425b029f3e",
+    "order": 52
+  },
+  {
+    "name": "Brandys",
+    "id": "6b4f13ee-c219-4c07-9033-3f978199e179",
+    "order": 56
+  },
+  {
+    "name": "Whiskey",
+    "id": "812f8fef-389c-491f-b860-f7a33650d10c",
+    "order": 70
+  },
+  {
+    "name": "Vodka",
+    "id": "9b01f57f-a246-4916-94cf-00e3ae72ccea",
+    "order": 59
+  },
+  {
+    "name": "Aperitivos",
+    "id": "c3937d34-24c6-4471-9673-086101a0c1bc",
+    "order": 55
+  },
+  {
+    "name": "Cafés e Infusiones",
+    "id": "cf4cae10-c540-4b3e-af4b-ed2ebcb58591",
+    "order": 54
+  },
+  {
+    "name": "Otros Licores",
+    "id": "e1aad1e3-6dc0-4d6c-986e-c21115a22a2f",
+    "order": 61
+  },
+  {
+    "name": "Gin",
+    "id": "e50894b2-91ce-4a4c-8c36-d9de33bad517",
+    "order": 57
+  },
+  {
+    "name": "Cervezas",
+    "id": "e8e208c4-9e8c-49a0-bc23-f8a796c16323",
+    "order": 51
+  },
+  {
+    "name": "Carnes a la brasa",
+    "id": "072ae251-b36b-4b21-8625-7fd939183b8f",
+    "order": 4
+  },
+  {
+    "name": "Pastas",
+    "id": "149b4669-b6fc-4aab-8c78-8a426cb0d15b",
+    "order": 7
+  },
+  {
+    "name": "Pizzas",
+    "id": "266148cb-5f57-48f9-a5b7-97c01c56b0b0",
+    "order": 9
+  },
+  {
+    "name": "Pa amb oli",
+    "id": "2b5f1660-b439-4ada-94c2-82334672c107",
+    "order": 3
+  },
+  {
+    "name": "Ensaladas",
+    "id": "2c229768-2833-4396-b9db-b5f0a1dfd353",
+    "order": 2
+  },
+  {
+    "name": "Pescados",
+    "id": "658125e0-12ee-431a-8c31-8ea499112870",
+    "order": 5
+  },
+  {
+    "name": "Arroces (min. 2 pers)",
+    "id": "7010ee8f-849b-4a92-a4c3-229b280f8fee",
+    "order": 6
+  },
+  {
+    "name": "Menú Infantil",
+    "id": "877f5fa2-1dac-43f3-b7e6-59e163777072",
+    "order": 8
+  },
+  {
+    "name": "Entrantes",
+    "id": "e3e42e1a-344a-4779-ba8e-2ac83cb8cd04",
+    "order": 1
+  },
+  {
+    "name": "Helado",
+    "id": "56bd40b4-52ce-4598-a8a4-135fdd27d897",
+    "order": 42
+  },
+  {
+    "name": "Postres",
+    "id": "a3835e9f-390b-42b5-96cf-c4a99680fe18",
+    "order": 41
+  },
+  {
+    "name": "Negre (Tinto)",
+    "id": "0bf09e0a-dc25-40b6-ba3b-47fe5494010c",
+    "order": 91
+  },
+  {
+    "name": "Cava / Champ.",
+    "id": "14b7b10f-29be-4f28-afe3-ec3ff21272a0",
+    "order": 94
+  },
+  {
+    "name": "Blancs (Blanco)",
+    "id": "1d85130c-eca2-4b86-89e7-eab504ceda48",
+    "order": 92
+  },
+  {
+    "name": "Rosats (Rosado)",
+    "id": "d1035426-dbc5-41dc-b1fb-dcf09a68ba12",
+    "order": 93
+  }
+]
