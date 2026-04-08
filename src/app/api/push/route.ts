@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       privateKey
     );
 
-    const { title, body, url } = await request.json();
+    const { title, body, url, restaurant_id } = await request.json();
 
     // 1. Inicializar Supabase con Service Role para leer todas las suscripciones
     const supabaseAdmin = createClient(
@@ -26,10 +26,13 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // 2. Obtener todas las suscripciones
-    const { data: subscriptions, error } = await supabaseAdmin
-      .from('push_subscriptions')
-      .select('*');
+    // 2. Obtener las suscripciones filtradas por restaurante si se proporciona
+    let query = supabaseAdmin.from('push_subscriptions').select('*');
+    if (restaurant_id) {
+      query = query.eq('restaurant_id', restaurant_id);
+    }
+    
+    const { data: subscriptions, error } = await query;
 
     if (error) throw error;
 

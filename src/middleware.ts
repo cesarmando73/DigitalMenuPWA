@@ -56,16 +56,32 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Proteger rutas de /admin
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginPath = request.nextUrl.pathname.startsWith('/admin/login')
+  const pathname = request.nextUrl.pathname
+  
+  // Pattern to match /[slug]/admin and /[slug]/admin/anything
+  // This regex matches a path that starts with a slash, then any non-slash chars (the slug), then /admin
+  const adminPattern = /^\/([^\/]+)\/admin(\/.*)?$/
+  const match = pathname.match(adminPattern)
 
-  if (isAdminPath) {
+  if (match) {
+    const slug = match[1]
+    const isLoginPath = pathname.endsWith('/admin/login')
+
     if (!user && !isLoginPath) {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      // Redirect to specific restaurant login
+      return NextResponse.redirect(new URL(`/${slug}/admin/login`, request.nextUrl.origin))
     }
+    
     if (user && isLoginPath) {
-      return NextResponse.redirect(new URL('/admin', request.url))
+      // Already logged in, go to dashboard
+      return NextResponse.redirect(new URL(`/${slug}/admin`, request.nextUrl.origin))
+    }
+  }
+
+  // Handle the old /admin and /admin/login routes if they still exist or are hit
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    if (!user && pathname !== '/admin/login') {
+      return NextResponse.redirect(new URL('/admin/login', request.nextUrl.origin))
     }
   }
 
@@ -73,5 +89,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - api (API routes)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|api).*)',
+  ],
 }

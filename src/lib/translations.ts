@@ -1,4 +1,4 @@
-export const translations: { [key: string]: { [key: string]: string } } = {
+export const translations: { [key: string]: { [key: string]: any } } = {
   es: {
     digital_menu: 'Menú Digital',
     comida: 'Comida',
@@ -29,7 +29,21 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     push_desc: 'Recibe ofertas y novedades en tu móvil.',
     push_btn: 'Activar Notificaciones',
     push_active: 'Notificaciones Activas',
-    push_denied: 'Permiso Denegado'
+    push_denied: 'Permiso Denegado',
+    open_until: 'Abierto • Hasta las',
+    closed_opens_tomorrow: 'Cerrado • Abre mañana a las',
+    closed_opens_today: 'Cerrado • Abre hoy a las',
+    view_details: 'Ver detalle semanal',
+    and_connector: 'y',
+    days: {
+      Monday: 'Lunes',
+      Tuesday: 'Martes',
+      Wednesday: 'Miércoles',
+      Thursday: 'Jueves',
+      Friday: 'Viernes',
+      Saturday: 'Sábado',
+      Sunday: 'Domingo'
+    }
   },
   ca: {
     digital_menu: 'Menú Digital',
@@ -60,7 +74,21 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     push_desc: 'Rep ofertes y novetats al teu mòbil.',
     push_btn: 'Activar Notificacions',
     push_active: 'Notificacions Actives',
-    push_denied: 'Permís Denegat'
+    push_denied: 'Permís Denegat',
+    open_until: 'Obert • Fins a les',
+    closed_opens_tomorrow: 'Tancat • Obre demà a les',
+    closed_opens_today: 'Tancat • Obre avui a les',
+    view_details: 'Veure detall setmanal',
+    and_connector: 'i',
+    days: {
+      Monday: 'Dilluns',
+      Tuesday: 'Dimarts',
+      Wednesday: 'Dimecres',
+      Thursday: 'Dijous',
+      Friday: 'Divendres',
+      Saturday: 'Dissabte',
+      Sunday: 'Diumenge'
+    }
   },
   en: {
     digital_menu: 'Digital Menu',
@@ -91,7 +119,21 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     push_desc: 'Receive offers and news on your phone.',
     push_btn: 'Enable Notifications',
     push_active: 'Notifications Enabled',
-    push_denied: 'Permission Denied'
+    push_denied: 'Permission Denied',
+    open_until: 'Open • Until',
+    closed_opens_tomorrow: 'Closed • Opens tomorrow at',
+    closed_opens_today: 'Closed • Opens today at',
+    view_details: 'View weekly details',
+    and_connector: 'and',
+    days: {
+      Monday: 'Monday',
+      Tuesday: 'Tuesday',
+      Wednesday: 'Wednesday',
+      Thursday: 'Thursday',
+      Friday: 'Friday',
+      Saturday: 'Saturday',
+      Sunday: 'Sunday'
+    }
   },
   de: {
     digital_menu: 'Digitale Speisekarte',
@@ -122,7 +164,21 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     push_desc: 'Erhalten Sie Angebote und Neuigkeiten auf Ihr Handy.',
     push_btn: 'Benachrichtigungen aktivieren',
     push_active: 'Benachrichtigungen aktiv',
-    push_denied: 'Berechtigung verweigert'
+    push_denied: 'Berechtigung verweigert',
+    open_until: 'Geöffnet • Bis',
+    closed_opens_tomorrow: 'Geschlossen • Öffnet morgen um',
+    closed_opens_today: 'Geschlossen • Öffnet heute um',
+    view_details: 'Wöchentliche Details anzeigen',
+    and_connector: 'und',
+    days: {
+      Monday: 'Montag',
+      Tuesday: 'Dienstag',
+      Wednesday: 'Mittwoch',
+      Thursday: 'Donnerstag',
+      Friday: 'Freitag',
+      Saturday: 'Samstag',
+      Sunday: 'Sonntag'
+    }
   },
   fr: {
     digital_menu: 'Menu Numérique',
@@ -153,7 +209,21 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     push_desc: 'Recevez des offres et des nouvelles sur votre mobile.',
     push_btn: 'Activer les notifications',
     push_active: 'Notifications actives',
-    push_denied: 'Autorisation refusée'
+    push_denied: 'Autorisation refusée',
+    open_until: 'Ouvert • Jusqu\'à',
+    closed_opens_tomorrow: 'Fermé • Ouvre demain à',
+    closed_opens_today: 'Fermé • Ouvre aujourd\'hui à',
+    view_details: 'Voir les détails hebdomadaires',
+    and_connector: 'et',
+    days: {
+      Monday: 'Lundi',
+      Tuesday: 'Mardi',
+      Wednesday: 'Mercredi',
+      Thursday: 'Jeudi',
+      Friday: 'Vendredi',
+      Saturday: 'Samedi',
+      Sunday: 'Dimanche'
+    }
   },
   it: {
     digital_menu: 'Menu Digitale',
@@ -173,7 +243,7 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     allergen_filter_title: 'Seleziona allergeni da evitare',
     contact: 'Contatto',
     address: 'Indirizzo',
-    how_to_get: 'Come arrivare',
+    how_to_get: 'Come llegar',
     phone: 'Telefono',
     schedule: 'Orario',
     mon_tue: 'Lunedì - Martedì',
@@ -184,7 +254,21 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     push_desc: 'Ricevi offerte e novità sul tuo cellulare.',
     push_btn: 'Attiva notifiche',
     push_active: 'Notifiche attive',
-    push_denied: 'Permesso negato'
+    push_denied: 'Permesso negato',
+    open_until: 'Aperto • Fino alle',
+    closed_opens_tomorrow: 'Chiuso • Apre domani alle',
+    closed_opens_today: 'Chiuso • Apre oggi alle',
+    view_details: 'Visualizza dettagli settimanali',
+    and_connector: 'e',
+    days: {
+      Monday: 'Lunedì',
+      Tuesday: 'Martedì',
+      Wednesday: 'Mercoledì',
+      Thursday: 'Giovedì',
+      Friday: 'Venerdì',
+      Saturday: 'Sabato',
+      Sunday: 'Domenica'
+    }
   },
   pt: {
     digital_menu: 'Menu Digital',
@@ -215,6 +299,20 @@ export const translations: { [key: string]: { [key: string]: string } } = {
     push_desc: 'Receba ofertas e novidades no seu telemóvel.',
     push_btn: 'Ativar notificações',
     push_active: 'Notificações ativas',
-    push_denied: 'Permissão negada'
+    push_denied: 'Permissão negada',
+    open_until: 'Aberto • Até às',
+    closed_opens_tomorrow: 'Fechado • Abre amanhã às',
+    closed_opens_today: 'Fechado • Abre hoje às',
+    view_details: 'Ver detalhes semanais',
+    and_connector: 'e',
+    days: {
+      Monday: 'Segunda-feira',
+      Tuesday: 'Terça-feira',
+      Wednesday: 'Quarta-feira',
+      Thursday: 'Quinta-feira',
+      Friday: 'Sexta-feira',
+      Saturday: 'Sábado',
+      Sunday: 'Domingo'
+    }
   }
 };

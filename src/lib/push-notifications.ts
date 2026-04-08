@@ -17,7 +17,7 @@ function urlBase64ToUint8Array(base64String: string) {
 /**
  * Suscribe al usuario actual a las notificaciones push
  */
-export async function subscribeToPush(supabase: any) {
+export async function subscribeToPush(supabase: any, restaurantId: string) {
   try {
     // 1. Verificar si el SW está listo
     const registration = await navigator.serviceWorker.ready;
@@ -42,6 +42,7 @@ export async function subscribeToPush(supabase: any) {
       .upsert({
         endpoint: subscription.endpoint,
         subscription_json: subscription,
+        restaurant_id: restaurantId,
       }, { onConflict: 'endpoint' });
 
     if (error) throw error;
