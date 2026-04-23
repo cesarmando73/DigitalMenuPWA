@@ -7,7 +7,7 @@ import {
   Search, Plus, Edit2, Trash2, Save, X, LogOut, 
   Upload, LayoutGrid, Utensils, Settings, 
   MapPin, Phone, Mail, Palette, Image as ImageIcon,
-  Sparkles, Bell, Map as MapIcon, ExternalLink, Instagram, Facebook,
+  Sparkles, Bell, Map as MapIcon, ExternalLink, Instagram, Facebook, AlertCircle,
   Coffee, Wine, IceCream, ChevronRight, Clock
 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
