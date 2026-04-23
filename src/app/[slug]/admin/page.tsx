@@ -7,7 +7,7 @@ import {
   Search, Plus, Edit2, Trash2, Save, X, LogOut, 
   Upload, LayoutGrid, Utensils, Settings, 
   MapPin, Phone, Mail, Palette, Image as ImageIcon,
-  Bell, Map as MapIcon, ExternalLink, Instagram, Facebook,
+  Sparkles, Bell, Map as MapIcon, ExternalLink, Instagram, Facebook,
   Coffee, Wine, IceCream, ChevronRight, Clock
 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'hours' | 'settings' | 'push'>('products');
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [loadingTranslations, setLoadingTranslations] = useState(false);
   
   // Filtering
   const [selectedSection, setSelectedSection] = useState('comida');
@@ -96,6 +97,25 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
+  const translateAI = async () => {
+    if (!editingProduct?.name_es) return alert('Escribe el nombre en español primero.');
+    setLoadingTranslations(true);
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingProduct.name_es, description: editingProduct.desc_es })
+      });
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      setEditingProduct({ ...editingProduct, ...data });
+    } catch (err: any) {
+      alert(`Error al traducir: ${err.message}`);
+    } finally {
+      setLoadingTranslations(false);
+    }
+  };
+
   const handleProductUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!restaurant) return;
@@ -121,6 +141,32 @@ export default function AdminDashboard() {
     setEditingProduct(null); 
     fetchData(restaurant.id);
     setIsSaving(false);
+  };
+
+  const translateCategoryAI = async () => {
+    if (!editingCategory?.name_es) return alert('Escribe el nombre en español primero.');
+    setLoadingTranslations(true);
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingCategory.name_es, description: '' })
+      });
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      
+      // Filtramos solo los campos de nombre
+      const nameOnlyData: any = {};
+      Object.keys(data).forEach(key => {
+        if (key.startsWith('name_')) nameOnlyData[key] = data[key];
+      });
+      
+      setEditingCategory({ ...editingCategory, ...nameOnlyData });
+    } catch (err: any) {
+      alert(`Error al traducir categoría: ${err.message}`);
+    } finally {
+      setLoadingTranslations(false);
+    }
   };
 
   const handleCategoryUpdate = async (e: React.FormEvent) => {
@@ -354,14 +400,32 @@ export default function AdminDashboard() {
 
                 <div className="flex items-center gap-3">
                     {activeTab === 'products' && (
-                        <button onClick={() => setEditingProduct({ name_es: '', price_main: 0, is_visible: true, category_id: currentCategories[0]?.id })} className="bg-white text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
+                        <button onClick={() => setEditingProduct({ 
+                             name_es: '', 
+                             price_main: 0, 
+                             is_visible: true, 
+                             category_id: selectedCategory || (currentCategories[0]?.id || ''),
+                             order: currentProducts.length,
+                             name_ca: '', name_en: '', name_de: '', name_fr: '', name_it: '', name_pt: '',
+                             desc_es: '', desc_ca: '', desc_en: '', desc_de: '', desc_fr: '', desc_it: '', desc_pt: '',
+                             product_code: '',
+                             price_secondary: null
+                           })} className="bg-white text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
                             <Plus className="w-4 h-4" /> Nuevo Plato
                         </button>
                     )}
                     {activeTab === 'categories' && (
-                        <button onClick={() => setEditingCategory({ name_es: '', order: currentCategories.length, section: selectedSection })} className="bg-white text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
-                            <Plus className="w-4 h-4" /> Nueva Cat.
-                        </button>
+                         <button 
+                           onClick={() => setEditingCategory({ 
+                             name_es: '', 
+                             order: currentCategories.length, 
+                             section: selectedSection,
+                             name_ca: '', name_en: '', name_de: '', name_fr: '', name_it: '', name_pt: ''
+                           })} 
+                           className="bg-white text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-xl"
+                         >
+                             <Plus className="w-4 h-4" /> Nueva Cat.
+                         </button>
                     )}
                 </div>
            </div>
@@ -372,45 +436,70 @@ export default function AdminDashboard() {
              <div className="space-y-6">
                 {/* CATEGORY FILTERS WITHIN TAB */}
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
-                    <button onClick={() => setSelectedCategory(null)} className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${!selectedCategory ? 'bg-zinc-800 text-white border-white/20' : 'text-zinc-500 border-white/5 hover:border-white/20'}`}>TODAS</button>
+                    <button onClick={() => setSelectedCategory(null)} className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${!selectedCategory ? 'bg-white text-black border-white' : 'bg-white/5 text-zinc-500 border-white/5 hover:border-white/20'}`}>TODAS</button>
                     {currentCategories.map(cat => (
-                        <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${selectedCategory === cat.id ? 'bg-zinc-800 text-white border-white/20' : 'text-zinc-500 border-white/5 hover:border-white/20'}`}>{cat.name_es}</button>
+                        <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${selectedCategory === cat.id ? 'bg-white text-black border-white' : 'bg-white/5 text-zinc-500 border-white/5 hover:border-white/20'}`}>{cat.name_es}</button>
                     ))}
                 </div>
 
-                <div className="bg-zinc-900/50 border border-white/5 rounded-3xl relative">
+                <div className="bg-[#0A0A0A] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
                     <div className="overflow-x-auto custom-scrollbar">
-                        <table className="w-full text-left min-w-[700px]">
+                        <table className="w-full text-left min-w-[800px]">
                             <thead>
-                                <tr className="border-b border-white/5 text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                                    <th className="px-6 py-4">Producto</th>
-                                    <th className="px-6 py-4 text-center">Categoría</th>
-                                    <th className="px-6 py-4 text-center">Precio</th>
-                                    <th className="px-6 py-4 text-center">Publicado</th>
-                                    <th className="px-6 py-4 text-right">Acción</th>
+                                <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">
+                                    <th className="px-10 py-6">PRODUCTO / IDENTIFICADOR</th>
+                                    <th className="px-10 py-6 text-center">CATEGORÍA</th>
+                                    <th className="px-10 py-6 text-center">PRECIO</th>
+                                    <th className="px-10 py-6 text-center">ESTADO</th>
+                                    <th className="px-10 py-6 text-right">ACCIÓN</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {currentProducts.map(p => (
-                                    <tr key={p.id} className="group hover:bg-white/[0.01]">
-                                        <td className="px-6 py-4 flex items-center gap-4">
-                                            <img src={p.image_url || 'https://via.placeholder.com/100'} className="w-12 h-12 rounded-xl object-cover border border-white/10" />
-                                            <div>
-                                                <p className="font-black text-sm">{p.name_es}</p>
-                                                <p className="text-[10px] text-zinc-600 font-mono italic">{p.product_code || '-'}</p>
+                                    <tr key={p.id} className="group hover:bg-white/[0.02] transition-colors">
+                                        <td className="px-10 py-6">
+                                            <div className="flex items-center gap-5">
+                                                <div className="relative h-14 w-14 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0">
+                                                    <img src={p.image_url || 'https://via.placeholder.com/100'} className="w-full h-full object-cover" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-black text-sm uppercase tracking-tight">{p.name_es}</p>
+                                                    <p className="text-[10px] text-zinc-600 font-mono mt-1 opacity-60">ID: {p.product_code || '-'}</p>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-center text-xs text-zinc-500 uppercase font-bold">{p.categories?.name_es}</td>
-                                        <td className="px-6 py-4 text-center font-black">{p.price_main}€</td>
-                                        <td className="px-6 py-4 text-center">
-                                            <div className={`inline-block w-2 h-2 rounded-full ${p.is_visible ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-red-500'}`} />
+                                        <td className="px-10 py-6 text-center">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 px-4 py-2 bg-white/5 rounded-xl border border-white/5">
+                                                {p.categories?.name_es}
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button onClick={async () => {
+                                        <td className="px-10 py-6 text-center">
+                                            <span className="text-lg font-black italic tracking-tighter">{p.price_main}€</span>
+                                        </td>
+                                        <td className="px-10 py-6 text-center">
+                                            {p.is_visible ? (
+                                                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-500/10 border border-green-500/20">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                                                    <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">EN CARTA</span>
+                                                </div>
+                                            ) : (
+                                                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-500/10 border border-red-500/20">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                                                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">OCULTO</span>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="px-10 py-6 text-right">
+                                            <button 
+                                              onClick={async () => {
                                                 setEditingProduct(p);
                                                 const { data: relAl } = await supabase.from('producto_alergenos').select('alergeno_id').eq('producto_id', p.id);
                                                 if (relAl) setProductAllergens(relAl.map(r => r.alergeno_id));
-                                            }} className="p-2.5 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
+                                              }} 
+                                              className="p-3 bg-zinc-900 rounded-2xl border border-white/10 hover:bg-white hover:text-black transition-all shadow-xl active:scale-90"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -814,43 +903,177 @@ export default function AdminDashboard() {
       <AnimatePresence>
         {editingProduct && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProduct(null)} className="absolute inset-0 bg-black/95"></motion.div>
-             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-2xl bg-zinc-950 border border-white/10 p-8 rounded-[2.5rem] overflow-y-auto max-h-[90vh] custom-scrollbar">
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProduct(null)} className="absolute inset-0 bg-black/95 backdrop-blur-sm"></motion.div>
+             <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-4xl bg-[#121212] border border-white/5 p-10 rounded-[3rem] overflow-y-auto max-h-[90vh] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] custom-scrollbar">
+                
                 <div className="flex justify-between items-center mb-10">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter">Editar Plato</h2>
-                    <button onClick={() => setEditingProduct(null)} className="p-2 hover:bg-white/10 rounded-full"><X className="w-6 h-6" /></button>
+                    <h2 className="text-3xl font-black uppercase italic tracking-tighter">Editar <span className="text-[#D4AF37]">{editingProduct.name_es || 'Nuevo Producto'}</span></h2>
+                    <button onClick={() => setEditingProduct(null)} className="p-3 hover:bg-white/10 rounded-full transition-all active:scale-90"><X className="w-8 h-8" /></button>
                 </div>
 
-                <form onSubmit={handleProductUpdate} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="sm:col-span-2 flex justify-center">
-                        <div className="w-32 h-32 bg-zinc-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center relative overflow-hidden group">
-                           {editingProduct.image_url ? <img src={editingProduct.image_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-8 h-8 text-zinc-800" />}
-                           <label className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-all"><Upload className="w-8 h-8" /><input type="file" className="hidden" onChange={(e) => handleImageUpload(e, editingProduct.product_code || 'new', editingProduct.id)} /></label>
+                <form onSubmit={handleProductUpdate} className="space-y-12">
+                    {/* SECCIÓN 1: IMAGEN */}
+                    <div className="space-y-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 block ml-1">IMAGEN DEL PRODUCTO</span>
+                        <div className="w-full aspect-[2/1] sm:aspect-[3/1] bg-black/40 rounded-[2.5rem] border-2 border-dashed border-white/5 relative overflow-hidden group flex items-center justify-center">
+                           {editingProduct.image_url ? (
+                               <img src={editingProduct.image_url} className="w-full h-full object-contain p-4" />
+                           ) : (
+                               <div className="flex flex-col items-center gap-3">
+                                   <ImageIcon className="w-10 h-10 text-zinc-800" />
+                                   <span className="text-[10px] font-bold text-zinc-700">SIN IMAGEN</span>
+                               </div>
+                           )}
+                           <label className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all duration-500">
+                               <Upload className="w-10 h-10 mb-2" />
+                               <span className="text-[10px] font-black uppercase tracking-widest">Subir Nueva Foto</span>
+                               <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, editingProduct.product_code || 'new', editingProduct.id)} />
+                           </label>
                         </div>
                     </div>
 
-                    <label className="sm:col-span-2">
-                        <span className="text-[10px] font-black uppercase text-zinc-600 block mb-2">Nombre</span>
-                        <input type="text" required value={editingProduct.name_es} onChange={e => setEditingProduct({...editingProduct, name_es: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-sm font-black" />
-                    </label>
-                    <label>
-                        <span className="text-[10px] font-black uppercase text-zinc-600 block mb-2">Precio (€)</span>
-                        <input type="number" step="0.01" required value={editingProduct.price_main} onChange={e => setEditingProduct({...editingProduct, price_main: parseFloat(e.target.value)})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3" />
-                    </label>
-                    <label>
-                        <span className="text-[10px] font-black uppercase text-zinc-600 block mb-2">Categoría</span>
-                        <select value={editingProduct.category_id} onChange={e => setEditingProduct({...editingProduct, category_id: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs">
-                            {categories.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name_es}</option>)}
-                        </select>
-                    </label>
-                    <div className="sm:col-span-2 flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 mb-6">
-                        <span className="text-[10px] font-black uppercase text-zinc-600">Visible</span>
-                        <button type="button" onClick={() => setEditingProduct({...editingProduct, is_visible: !editingProduct.is_visible})} className={`px-5 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${editingProduct.is_visible ? 'bg-green-500 text-black' : 'bg-red-500 text-white'}`}>{editingProduct.is_visible ? 'SÍ' : 'NO'}</button>
+                    {/* SECCIÓN 2: TRADUCCIONES */}
+                    <div className="space-y-8">
+                        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                           <span className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-600">TRADUCCIONES</span>
+                           <button 
+                             type="button"
+                             onClick={translateAI}
+                             disabled={loadingTranslations}
+                             className="flex items-center gap-2 bg-[#D4AF37] text-black px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50"
+                           >
+                               {loadingTranslations ? (
+                                   <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                               ) : <Sparkles className="w-3.5 h-3.5" />}
+                               TRADUCIR CON AI
+                           </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                            {[
+                                { code: 'es', label: 'ES' }, { code: 'ca', label: 'CA' },
+                                { code: 'en', label: 'EN' }, { code: 'de', label: 'DE' },
+                                { code: 'fr', label: 'FR' }, { code: 'it', label: 'IT' },
+                                { code: 'pt', label: 'PT' }
+                            ].map(l => (
+                                <div key={l.code} className="space-y-4">
+                                    <div className="flex items-center justify-between px-1">
+                                        <span className="text-xs font-black text-zinc-400">{l.label}</span>
+                                        <span className="text-[8px] font-black uppercase text-zinc-700 tracking-widest">NOMBRE Y DESCRIPCIÓN</span>
+                                    </div>
+                                    <input 
+                                      type="text" 
+                                      placeholder={`Nombre (${l.label})`}
+                                      value={editingProduct[`name_${l.code}`] || ''} 
+                                      onChange={e => setEditingProduct({...editingProduct, [`name_${l.code}`]: e.target.value})} 
+                                      className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-sm font-black focus:border-[#D4AF37]/50 outline-none transition-all" 
+                                    />
+                                    <textarea 
+                                      placeholder={`Descripción (${l.label})`}
+                                      value={editingProduct[`desc_${l.code}`] || ''} 
+                                      onChange={e => setEditingProduct({...editingProduct, [`desc_${l.code}`]: e.target.value})} 
+                                      className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-sm h-28 resize-none focus:border-[#D4AF37]/50 outline-none transition-all italic font-medium" 
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    <button type="submit" disabled={isSaving} className="sm:col-span-2 py-5 bg-white text-black font-black uppercase text-xs tracking-[0.2em] rounded-2xl shadow-2xl">
-                      {isSaving ? 'GUARDANDO...' : 'CONFIRMAR PLATO'}
-                    </button>
+                    {/* SECCIÓN 3: ALÉRGENOS */}
+                    <div className="space-y-6 pt-10 border-t border-white/5">
+                        <span className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-600 block">INFORMACIÓN ALIMENTARIA (ALÉRGENOS)</span>
+                        {allAllergens.length > 0 ? (
+                            <div className="grid grid-cols-4 sm:grid-cols-7 gap-4">
+                                {allAllergens.map(al => {
+                                    const isSelected = productAllergens.includes(al.id);
+                                    return (
+                                        <button 
+                                          key={al.id}
+                                          type="button"
+                                          onClick={() => {
+                                              if (isSelected) setProductAllergens(productAllergens.filter(id => id !== al.id));
+                                              else setProductAllergens([...productAllergens, al.id]);
+                                          }}
+                                          className={`relative aspect-square rounded-2xl border transition-all flex flex-col items-center justify-center gap-2 group ${isSelected ? 'bg-[#D4AF37]/10 border-[#D4AF37] shadow-lg' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
+                                        >
+                                            <img src={al.icono_url} className={`w-8 h-8 object-contain transition-all ${isSelected ? 'opacity-100' : 'opacity-20 group-hover:opacity-40'}`} />
+                                            <span className={`text-[7px] font-black uppercase text-center px-1 leading-tight ${isSelected ? 'text-[#D4AF37]' : 'text-zinc-700'}`}>{al.nombre_es}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3 p-6 bg-red-500/5 border border-red-500/10 rounded-2xl text-red-500/60 text-xs italic font-bold">
+                               <AlertCircle className="w-4 h-4" /> Tabla de alérgenos vacía o no ejecutada en Supabase.
+                            </div>
+                        )}
+                    </div>
+
+                    {/* SECCIÓN 4: PRECIOS Y ESTADO */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-10 border-t border-white/5">
+                        <div className="grid grid-cols-2 gap-6">
+                            <label className="col-span-1">
+                                <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest block mb-4">CÓDIGO ESTÁNDAR</span>
+                                <input type="text" value={editingProduct.product_code || ''} onChange={e => setEditingProduct({...editingProduct, product_code: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black uppercase tracking-widest focus:border-[#D4AF37]/50 outline-none" />
+                            </label>
+                            <label className="col-span-1">
+                                <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest block mb-4">POSICIÓN / ORDEN</span>
+                                <input type="number" value={editingProduct.order || 0} onChange={e => setEditingProduct({...editingProduct, order: parseInt(e.target.value)})} className="w-full bg-black/60 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-center focus:border-[#D4AF37]/50 outline-none" />
+                            </label>
+                            <label>
+                                <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest block mb-4">PRECIO PRINCIPAL (€)</span>
+                                <input type="number" step="0.01" value={editingProduct.price_main || 0} onChange={e => setEditingProduct({...editingProduct, price_main: parseFloat(e.target.value)})} className="w-full bg-black/60 border border-white/10 rounded-2xl px-6 py-4 text-xl font-black text-[#D4AF37] focus:border-[#D4AF37] outline-none" />
+                            </label>
+                            <label>
+                                <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest block mb-4">PRECIO COPA (€)</span>
+                                <input type="number" step="0.01" value={editingProduct.price_secondary || ''} onChange={e => setEditingProduct({...editingProduct, price_secondary: e.target.value ? parseFloat(e.target.value) : null})} className="w-full bg-black/60 border border-white/10 rounded-2xl px-6 py-4 text-xl font-black focus:border-[#D4AF37] outline-none" />
+                            </label>
+                        </div>
+
+                        <div className="space-y-4">
+                            <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest block ml-1">ESTADO PÚBLICO</span>
+                            <button 
+                                type="button" 
+                                onClick={() => setEditingProduct({...editingProduct, is_visible: !editingProduct.is_visible})}
+                                className={`w-full h-[140px] rounded-[2rem] flex flex-col items-center justify-center gap-4 transition-all border-2 group ${editingProduct.is_visible ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}
+                            >
+                                {editingProduct.is_visible ? (
+                                    <>
+                                        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(34,197,94,0.4)] group-hover:scale-110 transition-transform">
+                                            <Utensils className="w-6 h-6 text-black" />
+                                        </div>
+                                        <span className="text-sm font-black uppercase tracking-[0.2em]">PUBLICADO</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.4)] group-hover:scale-110 transition-transform">
+                                            <X className="w-6 h-6 text-white" />
+                                        </div>
+                                        <span className="text-sm font-black uppercase tracking-[0.2em]">NO PUBLICADO</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* BOTONES DE ACCIÓN */}
+                    <div className="flex flex-col sm:flex-row gap-4 pt-10 border-t border-white/5">
+                        <button 
+                          type="button" 
+                          onClick={() => setEditingProduct(null)} 
+                          className="flex-1 py-6 bg-white/5 border border-white/10 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 transition-all"
+                        >
+                            DESCARTAR
+                        </button>
+                        <button 
+                          type="submit" 
+                          disabled={isSaving} 
+                          className="flex-[2] py-6 bg-[#D4AF37] text-black font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                        >
+                            <Save className="w-5 h-5" />
+                            {isSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                        </button>
+                    </div>
                 </form>
              </motion.div>
           </div>
@@ -860,27 +1083,101 @@ export default function AdminDashboard() {
       <AnimatePresence>
         {editingCategory && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                <div className="absolute inset-0 bg-black/95" onClick={() => setEditingCategory(null)}></div>
-                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-lg bg-zinc-950 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-8 text-center">Gestionar Categoría</h2>
-                    <form onSubmit={handleCategoryUpdate} className="space-y-6">
-                        <label className="block">
-                            <span className="text-[10px] font-black uppercase text-zinc-600 block mb-2">Nombre</span>
-                            <input type="text" required value={editingCategory.name_es} onChange={e => setEditingCategory({...editingCategory, name_es: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 font-black" />
-                        </label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <label>
-                                <span className="text-[10px] font-black uppercase text-zinc-600 block mb-2">Sección</span>
-                                <select value={editingCategory.section} onChange={e => setEditingCategory({...editingCategory, section: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[10px] font-black uppercase appearance-none">
-                                    {['comida', 'bebida', 'postre', 'vinos'].map(s => <option key={s} value={s} className="bg-black">{s.toUpperCase()}</option>)}
-                                </select>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingCategory(null)} className="absolute inset-0 bg-black/95 backdrop-blur-sm"></motion.div>
+                <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-3xl bg-[#121212] border border-white/5 rounded-[3rem] p-10 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-y-auto max-h-[90vh] custom-scrollbar">
+                    
+                    <div className="flex justify-between items-center mb-10">
+                        <h2 className="text-3xl font-black uppercase italic tracking-tighter">Gestionar <span className="text-[#D4AF37]">Categoría</span></h2>
+                        <button onClick={() => setEditingCategory(null)} className="p-3 hover:bg-white/10 rounded-full transition-all active:scale-90"><X className="w-8 h-8" /></button>
+                    </div>
+
+                    <form onSubmit={handleCategoryUpdate} className="space-y-10">
+                        {/* SECCIÓN 1: CONFIGURACIÓN BÁSICA */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/[0.02] p-8 rounded-[2rem] border border-white/5">
+                            <label className="block">
+                                <span className="text-[10px] font-black uppercase text-zinc-600 block mb-3 ml-1 tracking-widest">SECCIÓN DEL MENÚ</span>
+                                <div className="relative">
+                                    <select 
+                                      value={editingCategory.section} 
+                                      onChange={e => setEditingCategory({...editingCategory, section: e.target.value})} 
+                                      className="w-full bg-black/60 border border-white/10 rounded-2xl px-6 py-4 text-[11px] font-black uppercase tracking-widest appearance-none focus:border-[#D4AF37]/50 outline-none"
+                                    >
+                                        {['comida', 'bebida', 'postre', 'vinos'].map(s => <option key={s} value={s} className="bg-black">{s.toUpperCase()}</option>)}
+                                    </select>
+                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                                        <ChevronRight className="w-4 h-4 rotate-90" />
+                                    </div>
+                                </div>
                             </label>
-                            <label>
-                                <span className="text-[10px] font-black uppercase text-zinc-600 block mb-2">Orden</span>
-                                <input type="number" required value={editingCategory.order} onChange={e => setEditingCategory({...editingCategory, order: parseInt(e.target.value)})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-black" />
+                            <label className="block">
+                                <span className="text-[10px] font-black uppercase text-zinc-600 block mb-3 ml-1 tracking-widest">ORDEN DE APARICIÓN</span>
+                                <input 
+                                  type="number" 
+                                  required 
+                                  value={editingCategory.order} 
+                                  onChange={e => setEditingCategory({...editingCategory, order: parseInt(e.target.value)})} 
+                                  className="w-full bg-black/60 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-center focus:border-[#D4AF37]/50 outline-none" 
+                                />
                             </label>
                         </div>
-                        <button type="submit" disabled={isSaving} className="w-full py-5 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl">GUARDAR CATEGORÍA</button>
+
+                        {/* SECCIÓN 2: IDIOMAS Y TRADUCCIÓN */}
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                               <span className="text-[11px] font-black uppercase tracking-[0.3em] text-zinc-600">NOMBRES EN IDIOMAS</span>
+                               <button 
+                                 type="button"
+                                 onClick={translateCategoryAI}
+                                 disabled={loadingTranslations}
+                                 className="flex items-center gap-2 bg-[#D4AF37] text-black px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50"
+                               >
+                                   {loadingTranslations ? (
+                                       <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                   ) : <Sparkles className="w-3.5 h-3.5" />}
+                                   TRADUCIR CON AI
+                               </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {[
+                                    { code: 'es', label: 'ESPAÑOL' }, { code: 'ca', label: 'CATALÀ' },
+                                    { code: 'en', label: 'ENGLISH' }, { code: 'de', label: 'DEUTSCH' },
+                                    { code: 'fr', label: 'FRANÇAIS' }, { code: 'it', label: 'ITALIANO' },
+                                    { code: 'pt', label: 'PORTUGUÊS' }
+                                ].map(l => (
+                                    <label key={l.code} className="space-y-2">
+                                        <span className="text-[9px] font-black text-zinc-500 tracking-widest ml-1">{l.label}</span>
+                                        <input 
+                                          type="text" 
+                                          required={l.code === 'es'}
+                                          placeholder={`Nombre en ${l.label.toLowerCase()}`}
+                                          value={editingCategory[`name_${l.code}`] || ''} 
+                                          onChange={e => setEditingCategory({...editingCategory, [`name_${l.code}`]: e.target.value})} 
+                                          className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-sm font-black focus:border-[#D4AF37]/50 outline-none transition-all uppercase tracking-tight" 
+                                        />
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* BOTONES DE ACCIÓN */}
+                        <div className="flex flex-col sm:flex-row gap-4 pt-10 border-t border-white/5">
+                            <button 
+                              type="button" 
+                              onClick={() => setEditingCategory(null)} 
+                              className="flex-1 py-6 bg-white/5 border border-white/10 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 transition-all"
+                            >
+                                CANCELAR
+                            </button>
+                            <button 
+                              type="submit" 
+                              disabled={isSaving} 
+                              className="flex-[2] py-6 bg-white text-black font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                            >
+                                <Save className="w-5 h-5" />
+                                {isSaving ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                            </button>
+                        </div>
                     </form>
                 </motion.div>
             </div>
