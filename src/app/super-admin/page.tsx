@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { 
   Plus, Store, Search, LayoutGrid, List, ChevronRight, 
   Settings, User, PlusCircle, LogOut, Loader2, Database, ShieldCheck,
-  Mail, Lock, Phone, Clock, Power
+  Mail, Lock, Phone, Clock, Power, Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,6 +25,11 @@ export default function SuperAdminPage() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [totalProducts, setTotalProducts] = useState(0);
+
+  const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
+  const [renewingRes, setRenewingRes] = useState<any>(null);
+  const [newValidUntil, setNewValidUntil] = useState('');
+  const [isRenewing, setIsRenewing] = useState(false);
 
   useEffect(() => {
     async function checkAuth() {
@@ -47,6 +52,32 @@ export default function SuperAdminPage() {
     setTotalProducts(count || 0);
 
     setLoading(false);
+  }
+
+  async function renewRestaurant(e: React.FormEvent) {
+    e.preventDefault();
+    if (!renewingRes) return;
+    setIsRenewing(true);
+    try {
+      // Usar la fecha a las 23:59:59 para que termine al final del día
+      const dateToSave = new Date(newValidUntil);
+      dateToSave.setHours(23, 59, 59, 999);
+
+      const { error } = await supabase.from('restaurants').update({ 
+        valid_until: dateToSave.toISOString()
+      }).eq('id', renewingRes.id);
+      
+      if (error) throw error;
+      
+      alert('Fecha de vencimiento actualizada correctamente.');
+      loadRestaurants();
+      setIsRenewModalOpen(false);
+      setRenewingRes(null);
+    } catch (error: any) {
+      alert(`Error al renovar: ${error.message}`);
+    } finally {
+      setIsRenewing(false);
+    }
   }
 
   async function createRestaurant(e: React.FormEvent) {
@@ -187,6 +218,18 @@ export default function SuperAdminPage() {
                          <Power className="w-4 h-4" />
                       </button>
                       <button 
+                         onClick={() => {
+                           setRenewingRes(res);
+                           const currentDate = res.valid_until ? new Date(res.valid_until).toISOString().split('T')[0] : '';
+                           setNewValidUntil(currentDate);
+                           setIsRenewModalOpen(true);
+                         }}
+                         className="p-3 rounded-xl border border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
+                         title="Renovar Vigencia"
+                      >
+                         <Calendar className="w-4 h-4" />
+                      </button>
+                      <button 
                         onClick={() => router.push(`/${res.slug}/admin`)}
                         className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl font-black uppercase text-[9px] tracking-widest hover:bg-white hover:text-black transition-all flex items-center gap-2"
                       >
@@ -260,6 +303,41 @@ export default function SuperAdminPage() {
 
                     <button type="submit" disabled={isSaving} className="w-full py-5 bg-white text-black font-black uppercase text-xs tracking-[0.3em] rounded-2xl shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
                         {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-4 h-4" /> CREAR SISTEMA COMPLETO</>}
+                    </button>
+                </form>
+             </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL RENOVAR VIGENCIA */}
+      <AnimatePresence>
+        {isRenewModalOpen && renewingRes && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsRenewModalOpen(false)} className="absolute inset-0 bg-black/95 backdrop-blur-xl"></motion.div>
+             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-md bg-zinc-950 border border-white/10 rounded-[3rem] p-12 shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
+                <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-4 text-center">Renovar Servicio</h2>
+                <p className="text-center text-xs font-bold text-zinc-500 uppercase tracking-widest mb-12">
+                  Actualizar vigencia para: <span className="text-[#D4AF37]">{renewingRes.name}</span>
+                </p>
+
+                <form onSubmit={renewRestaurant} className="space-y-8">
+                    <label className="block">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-3 block px-2">Nueva Fecha de Caducidad</span>
+                      <div className="relative group">
+                        <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-700 group-focus-within:text-blue-500 transition-colors" />
+                        <input 
+                          type="date" 
+                          required 
+                          value={newValidUntil} 
+                          onChange={e => setNewValidUntil(e.target.value)} 
+                          className="w-full bg-black/40 border border-white/10 rounded-2xl pl-14 pr-6 py-4 font-bold outline-none focus:border-blue-500/40 text-white" 
+                        />
+                      </div>
+                    </label>
+
+                    <button type="submit" disabled={isRenewing} className="w-full py-5 bg-blue-500 text-white font-black uppercase text-xs tracking-[0.3em] rounded-2xl shadow-2xl hover:bg-blue-400 transition-all flex items-center justify-center gap-3">
+                        {isRenewing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'GUARDAR FECHA'}
                     </button>
                 </form>
              </motion.div>
